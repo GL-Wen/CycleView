@@ -7,7 +7,7 @@
 //
 
 #import "GLCycleView.h"
-#import "GLCycleCollectionViewCell.h"
+#import "GLCycleViewCell.h"
 
 @interface GLCycleView ()
 
@@ -17,9 +17,9 @@
 /*内容数量*/
 @property (nonatomic, assign) NSUInteger contentCount;
 
-@property (nonatomic, strong) UIView *leftContentView;
-@property (nonatomic, strong) UIView *currentContentView;
-@property (nonatomic, strong) UIView *rightContentView;
+@property (nonatomic, strong) GLCycleViewCell *leftCycleViewCell;
+@property (nonatomic, strong) GLCycleViewCell *currentCycleViewCell;
+@property (nonatomic, strong) GLCycleViewCell *rightCycleViewCell;
 
 @property (nonatomic, assign) CGFloat startPointX;
 
@@ -54,62 +54,53 @@
 {
     self.contentCount = [self.dataSource cycleViewViewContentCount:self];
     
-    self.leftContentView = [self.dataSource cycleViewView:self contentViewWithIndex:[self requireIndexWithIndex:self.index - 1]];
-    [self addSubview:self.leftContentView];
+    if (!self.contentCount)
+        return;
     
-    self.currentContentView = [self.dataSource cycleViewView:self contentViewWithIndex:[self requireIndexWithIndex:self.index]];
-    [self addSubview:self.currentContentView];
+    self.leftCycleViewCell = [[GLCycleViewCell alloc] initWithFrame:CGRectMake(-(CGRectGetWidth(self.frame) + self.margin), 0, CGRectGetWidth(self.frame), CGRectGetHeight(self.frame))];
+    [self addSubview:self.leftCycleViewCell];
     
-    self.rightContentView = [self.dataSource cycleViewView:self contentViewWithIndex:[self requireIndexWithIndex:self.index + 1]];
-    [self addSubview:self.rightContentView];
+    self.currentCycleViewCell = [[GLCycleViewCell alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.frame), CGRectGetHeight(self.frame))];
+    [self addSubview:self.currentCycleViewCell];
     
-    CGRect frame = self.leftContentView.frame;
-    frame.origin.x    = -(CGRectGetWidth(self.frame) + self.margin);
-    frame.size.width  = CGRectGetWidth(self.frame);
-    frame.size.height = CGRectGetHeight(self.frame);
-    self.leftContentView.frame = frame;
+    self.rightCycleViewCell = [[GLCycleViewCell alloc] initWithFrame:CGRectMake(CGRectGetWidth(self.frame) + self.margin, 0, CGRectGetWidth(self.frame), CGRectGetHeight(self.frame))];
+    [self addSubview:self.rightCycleViewCell];
     
-    frame = self.currentContentView.frame;
-    frame.size.width  = CGRectGetWidth(self.frame);
-    frame.size.height = CGRectGetHeight(self.frame);
-    self.currentContentView.frame = frame;
+    self.currentCycleViewCell.index = 0;
+    self.leftCycleViewCell.index = [self cellLastIndex:self.currentCycleViewCell.index];
+    self.rightCycleViewCell.index = [self cellNextIndex:self.currentCycleViewCell.index];
     
-    frame = self.rightContentView.frame;
-    frame.origin.x    = CGRectGetWidth(self.frame) + self.margin;
-    frame.size.width  = CGRectGetWidth(self.frame);
-    frame.size.height = CGRectGetHeight(self.frame);
-    self.rightContentView.frame = frame;
+    UIView *leftContentView = [self.dataSource cycleViewView:self contentViewWithIndex:self.leftCycleViewCell.index];
+    [self.leftCycleViewCell addSubview:leftContentView];
     
-    self.leftContentViewPoint = self.leftContentView.layer.position;
-    self.currentContentViewPoint = self.currentContentView.layer.position;
-    self.rightContentViewPoint = self.rightContentView.layer.position;
-}
-
-- (NSUInteger)requireIndexWithIndex:(NSInteger)index
-{
-    NSInteger requireIndex = index;
+    UIView *currentContentView = [self.dataSource cycleViewView:self contentViewWithIndex:self.currentCycleViewCell.index];
+    [self.currentCycleViewCell addSubview:currentContentView];
     
-    if (index < 0)
-        requireIndex = self.contentCount - 1;
-    else if (requireIndex >= self.contentCount)
-        requireIndex = 0;
+    UIView *rightContentView = [self.dataSource cycleViewView:self contentViewWithIndex:self.rightCycleViewCell.index];
+    [self.rightCycleViewCell addSubview:rightContentView];
     
-    return requireIndex;
+    leftContentView.frame = CGRectMake(0, 0, CGRectGetWidth(self.frame), CGRectGetHeight(self.frame));
+    currentContentView.frame = CGRectMake(0, 0, CGRectGetWidth(self.frame), CGRectGetHeight(self.frame));
+    rightContentView.frame = CGRectMake(0, 0, CGRectGetWidth(self.frame), CGRectGetHeight(self.frame));
+    
+    self.leftContentViewPoint = self.leftCycleViewCell.layer.position;
+    self.currentContentViewPoint = self.currentCycleViewCell.layer.position;
+    self.rightContentViewPoint = self.rightCycleViewCell.layer.position;
 }
 
 - (void)updateContentViewPointX:(CGFloat)pointX
 {
-    CGPoint movePoint = self.currentContentView.layer.position;
-    movePoint.x = pointX + self.leftContentViewPoint.x;
-    self.currentContentView.layer.position = movePoint;
-    
-    movePoint = self.leftContentView.layer.position;
+    CGPoint movePoint = self.currentCycleViewCell.layer.position;
     movePoint.x = pointX + self.currentContentViewPoint.x;
-    self.leftContentView.layer.position = movePoint;
+    self.currentCycleViewCell.layer.position = movePoint;
     
-    movePoint = self.rightContentView.layer.position;
+    movePoint = self.leftCycleViewCell.layer.position;
+    movePoint.x = pointX + self.leftContentViewPoint.x;
+    self.leftCycleViewCell.layer.position = movePoint;
+    
+    movePoint = self.rightCycleViewCell.layer.position;
     movePoint.x = pointX + self.rightContentViewPoint.x;
-    self.rightContentView.layer.position = movePoint;
+    self.rightCycleViewCell.layer.position = movePoint;
 }
 
 - (void)contentViewStopScrollPointX:(CGPoint)point
@@ -117,22 +108,56 @@
     if (point.x < -CGRectGetWidth(self.frame) / 2.) {
         NSLog(@"向左滑动");
         
-        [self anmiationContentView:self.leftContentView position:self.leftContentViewPoint];
-        [self anmiationContentView:self.currentContentView position:self.currentContentViewPoint];
-        [self anmiationContentView:self.rightContentView position:self.rightContentViewPoint];
+        GLCycleViewCell *tempView = self.leftCycleViewCell;
+        
+        self.leftCycleViewCell = self.currentCycleViewCell;
+        self.currentCycleViewCell = self.rightCycleViewCell;
+        self.rightCycleViewCell = tempView;
+        
+        [self.rightCycleViewCell.layer setPosition:CGPointMake(self.currentCycleViewCell.layer.position.x + self.bounds.size.width-_margin, self.rightCycleViewCell.layer.position.y)];
+        
+        self.rightCycleViewCell.index = [self cellNextIndex:self.currentCycleViewCell.index];
+        
+        UIView *rightContentView = [self.dataSource cycleViewView:self contentViewWithIndex:self.rightCycleViewCell.index];
+        [self.rightCycleViewCell.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
+        [self.rightCycleViewCell addSubview:rightContentView];
+        
+        rightContentView.frame = CGRectMake(0, 0, CGRectGetWidth(self.leftCycleViewCell.frame), CGRectGetHeight(self.leftCycleViewCell.frame));
+        
+        [self anmiationContentView:self.leftCycleViewCell position:self.leftContentViewPoint];
+        [self anmiationContentView:self.currentCycleViewCell position:self.currentContentViewPoint];
+        [self anmiationContentView:self.rightCycleViewCell position:self.rightContentViewPoint];
     }
     else if (point.x > CGRectGetWidth(self.frame) / 2.) {
         NSLog(@"向右滑动");
         
+        GLCycleViewCell *tempView = self.rightCycleViewCell;
         
+        self.rightCycleViewCell = self.currentCycleViewCell;
+        self.currentCycleViewCell = self.leftCycleViewCell;
+        self.leftCycleViewCell = tempView;
         
-        [self anmiationContentView:self.leftContentView position:self.leftContentViewPoint];
-        [self anmiationContentView:self.currentContentView position:self.currentContentViewPoint];
-        [self anmiationContentView:self.rightContentView position:self.rightContentViewPoint];
+        [self.leftCycleViewCell.layer setPosition:CGPointMake(self.currentCycleViewCell.layer.position.x - self.bounds.size.width + _margin, self.rightCycleViewCell.layer.position.y)];
+        
+        self.leftCycleViewCell.index = [self cellLastIndex:self.currentCycleViewCell.index];
+        
+        UIView *leftContentView = [self.dataSource cycleViewView:self contentViewWithIndex:self.leftCycleViewCell.index];
+        [self.leftCycleViewCell.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
+        [self.leftCycleViewCell addSubview:leftContentView];
+        
+        leftContentView.frame = CGRectMake(0, 0, CGRectGetWidth(self.leftCycleViewCell.frame), CGRectGetHeight(self.leftCycleViewCell.frame));
+        
+        [self anmiationContentView:self.leftCycleViewCell position:self.leftContentViewPoint];
+        [self anmiationContentView:self.currentCycleViewCell position:self.currentContentViewPoint];
+        [self anmiationContentView:self.rightCycleViewCell position:self.rightContentViewPoint];
     }
     else
     {
         NSLog(@"停留原处");
+        
+        [self anmiationContentView:self.leftCycleViewCell position:self.leftContentViewPoint];
+        [self anmiationContentView:self.currentCycleViewCell position:self.currentContentViewPoint];
+        [self anmiationContentView:self.rightCycleViewCell position:self.rightContentViewPoint];
     }
 }
 
@@ -144,16 +169,32 @@
     
     CAAnimationGroup* group = [CAAnimationGroup animation];
     group.animations = @[positionAnimation];
-    group.duration   = .5;
+    group.duration   = .3;
     [view.layer addAnimation:group forKey:nil];
     view.layer.position=position;
+}
+
+- (NSInteger)cellNextIndex:(NSInteger)index
+{
+    if (index == self.contentCount - 1) {
+        return 0;
+    }
+    return index + 1;
+}
+
+- (NSInteger)cellLastIndex:(NSInteger)index
+{
+    if (index == 0) {
+        return self.contentCount - 1;
+    }
+    return index-1;
 }
 
 #pragma mark - UIGestureRecognizer
 
 - (void)tapClickGesture:(UITapGestureRecognizer *)gesture
 {
-    
+    NSLog(@"tapClickGesture index = %ld",self.currentCycleViewCell.index);
 }
 
 - (void)panClickGesture:(UIPanGestureRecognizer *)gesture

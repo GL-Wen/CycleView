@@ -47,7 +47,7 @@ GLCycleViewDataSource
 
 - (NSUInteger)cycleViewViewContentCount:(GLCycleView *)view
 {
-    return 5;
+    return 3;
 }
 
 - (UIView *)cycleViewView:(GLCycleView *)view contentViewWithIndex:(NSUInteger)index

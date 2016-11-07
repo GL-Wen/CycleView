@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		C70E3A441DC62F070064D8E3 /* GLCycleCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C70E3A431DC62F070064D8E3 /* GLCycleCollectionViewCell.m */; };
+		C722328B1DD0D4060076EE96 /* GLCycleViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C722328A1DD0D4060076EE96 /* GLCycleViewCell.m */; };
 		C7983B5F1DC461D50051C35E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = C7983B5E1DC461D50051C35E /* main.m */; };
 		C7983B621DC461D50051C35E /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = C7983B611DC461D50051C35E /* AppDelegate.m */; };
 		C7983B651DC461D50051C35E /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C7983B641DC461D50051C35E /* ViewController.m */; };
@@ -37,8 +37,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		C70E3A421DC62F070064D8E3 /* GLCycleCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLCycleCollectionViewCell.h; sourceTree = "<group>"; };
-		C70E3A431DC62F070064D8E3 /* GLCycleCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLCycleCollectionViewCell.m; sourceTree = "<group>"; };
+		C72232891DD0D4060076EE96 /* GLCycleViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLCycleViewCell.h; sourceTree = "<group>"; };
+		C722328A1DD0D4060076EE96 /* GLCycleViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GLCycleViewCell.m; sourceTree = "<group>"; };
 		C7983B5A1DC461D50051C35E /* CycleView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CycleView.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C7983B5E1DC461D50051C35E /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		C7983B601DC461D50051C35E /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -152,8 +152,8 @@
 			children = (
 				C7983B911DC4620C0051C35E /* GLCycleView.h */,
 				C7983B921DC4620C0051C35E /* GLCycleView.m */,
-				C70E3A421DC62F070064D8E3 /* GLCycleCollectionViewCell.h */,
-				C70E3A431DC62F070064D8E3 /* GLCycleCollectionViewCell.m */,
+				C72232891DD0D4060076EE96 /* GLCycleViewCell.h */,
+				C722328A1DD0D4060076EE96 /* GLCycleViewCell.m */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -294,8 +294,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C722328B1DD0D4060076EE96 /* GLCycleViewCell.m in Sources */,
 				C7983B931DC4620C0051C35E /* GLCycleView.m in Sources */,
-				C70E3A441DC62F070064D8E3 /* GLCycleCollectionViewCell.m in Sources */,
 				C7983B651DC461D50051C35E /* ViewController.m in Sources */,
 				C7983B621DC461D50051C35E /* AppDelegate.m in Sources */,
 				C7983B5F1DC461D50051C35E /* main.m in Sources */,
