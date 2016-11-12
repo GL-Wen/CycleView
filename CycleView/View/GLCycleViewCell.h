@@ -10,6 +10,9 @@
 
 @interface GLCycleViewCell : UIView
 
+/**
+ 当前视图索引
+ */
 @property (nonatomic, assign) NSInteger index;
 
 @end

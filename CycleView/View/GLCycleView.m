@@ -1,18 +1,15 @@
 //
-//  TWStoreMapView.m
-//  SuperCarMan
+//  GLCycleView.m
+//  GLCycleView
 //
 //  Created by 温国良 on 2016/10/28.
-//  Copyright © 2016年 Toowell. All rights reserved.
+//  Copyright © 2016年 温国良. All rights reserved.
 //
 
 #import "GLCycleView.h"
 #import "GLCycleViewCell.h"
 
 @interface GLCycleView ()
-
-/*当前索引*/
-@property (nonatomic, assign) NSUInteger index;
 
 /*内容数量*/
 @property (nonatomic, assign) NSUInteger contentCount;
@@ -21,11 +18,22 @@
 @property (nonatomic, strong) GLCycleViewCell *currentCycleViewCell;
 @property (nonatomic, strong) GLCycleViewCell *rightCycleViewCell;
 
-@property (nonatomic, assign) CGFloat startPointX;
-
+/**
+ 三个视图point
+ */
 @property (nonatomic, assign) CGPoint leftContentViewPoint;
 @property (nonatomic, assign) CGPoint currentContentViewPoint;
 @property (nonatomic, assign) CGPoint rightContentViewPoint;
+
+/**
+ 视图点击手势
+ */
+@property (nonatomic, strong) UITapGestureRecognizer *tapGesture;
+
+/**
+ 视图滑动手势
+ */
+@property (nonatomic, strong) UIPanGestureRecognizer *panGesture;
 
 @end
 
@@ -37,8 +45,10 @@
 {
     if (self = [super initWithFrame:frame]) {
         
-        [self addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapClickGesture:)]];
-        [self addGestureRecognizer:[[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panClickGesture:)]];
+        [self addGestureRecognizer:self.tapGesture];
+        
+        self.margin      = 10;
+        self.isCanScroll = YES;
     }
     return self;
 }
@@ -51,6 +61,11 @@
 #pragma mark - Self
 
 - (void)reloadData
+{
+    [self reloadDataWithIndex:0];
+}
+
+- (void)reloadDataWithIndex:(NSUInteger)index
 {
     self.contentCount = [self.dataSource cycleViewViewContentCount:self];
     
@@ -79,13 +94,13 @@
     UIView *rightContentView = [self.dataSource cycleViewView:self contentViewWithIndex:self.rightCycleViewCell.index];
     [self.rightCycleViewCell addSubview:rightContentView];
     
-    leftContentView.frame = CGRectMake(0, 0, CGRectGetWidth(self.frame), CGRectGetHeight(self.frame));
+    leftContentView.frame    = CGRectMake(0, 0, CGRectGetWidth(self.frame), CGRectGetHeight(self.frame));
     currentContentView.frame = CGRectMake(0, 0, CGRectGetWidth(self.frame), CGRectGetHeight(self.frame));
-    rightContentView.frame = CGRectMake(0, 0, CGRectGetWidth(self.frame), CGRectGetHeight(self.frame));
+    rightContentView.frame   = CGRectMake(0, 0, CGRectGetWidth(self.frame), CGRectGetHeight(self.frame));
     
-    self.leftContentViewPoint = self.leftCycleViewCell.layer.position;
+    self.leftContentViewPoint    = self.leftCycleViewCell.layer.position;
     self.currentContentViewPoint = self.currentCycleViewCell.layer.position;
-    self.rightContentViewPoint = self.rightCycleViewCell.layer.position;
+    self.rightContentViewPoint   = self.rightCycleViewCell.layer.position;
 }
 
 - (void)updateContentViewPointX:(CGFloat)pointX
@@ -110,11 +125,13 @@
         
         GLCycleViewCell *tempView = self.leftCycleViewCell;
         
-        self.leftCycleViewCell = self.currentCycleViewCell;
+        self.leftCycleViewCell    = self.currentCycleViewCell;
         self.currentCycleViewCell = self.rightCycleViewCell;
-        self.rightCycleViewCell = tempView;
+        self.rightCycleViewCell   = tempView;
         
-        [self.rightCycleViewCell.layer setPosition:CGPointMake(self.currentCycleViewCell.layer.position.x + self.bounds.size.width-_margin, self.rightCycleViewCell.layer.position.y)];
+        CGPoint point = self.rightCycleViewCell.layer.position;
+        point.x = self.currentCycleViewCell.layer.position.x + self.bounds.size.width - self.margin;
+        self.rightCycleViewCell.layer.position = point;
         
         self.rightCycleViewCell.index = [self cellNextIndex:self.currentCycleViewCell.index];
         
@@ -133,11 +150,13 @@
         
         GLCycleViewCell *tempView = self.rightCycleViewCell;
         
-        self.rightCycleViewCell = self.currentCycleViewCell;
+        self.rightCycleViewCell   = self.currentCycleViewCell;
         self.currentCycleViewCell = self.leftCycleViewCell;
-        self.leftCycleViewCell = tempView;
+        self.leftCycleViewCell    = tempView;
         
-        [self.leftCycleViewCell.layer setPosition:CGPointMake(self.currentCycleViewCell.layer.position.x - self.bounds.size.width + _margin, self.rightCycleViewCell.layer.position.y)];
+        CGPoint point = self.leftCycleViewCell.layer.position;
+        point.x = self.currentCycleViewCell.layer.position.x - self.bounds.size.width + _margin;
+        self.leftCycleViewCell.layer.position = point;
         
         self.leftCycleViewCell.index = [self cellLastIndex:self.currentCycleViewCell.index];
         
@@ -171,23 +190,23 @@
     group.animations = @[positionAnimation];
     group.duration   = .3;
     [view.layer addAnimation:group forKey:nil];
-    view.layer.position=position;
+    view.layer.position = position;
 }
 
 - (NSInteger)cellNextIndex:(NSInteger)index
 {
-    if (index == self.contentCount - 1) {
+    if (index == self.contentCount - 1)
         return 0;
-    }
+    
     return index + 1;
 }
 
 - (NSInteger)cellLastIndex:(NSInteger)index
 {
-    if (index == 0) {
+    if (index == 0)
         return self.contentCount - 1;
-    }
-    return index-1;
+    
+    return index - 1;
 }
 
 #pragma mark - UIGestureRecognizer
@@ -197,7 +216,7 @@
     NSLog(@"tapClickGesture index = %ld",self.currentCycleViewCell.index);
 }
 
-- (void)panClickGesture:(UIPanGestureRecognizer *)gesture
+- (void)panGesture:(UIPanGestureRecognizer *)gesture
 {
     NSLog(@">>>>>>>>>>>> = %@",gesture.view);
     
@@ -207,7 +226,7 @@
     switch (gesture.state) {
         case UIGestureRecognizerStateBegan:
         {
-            self.startPointX = point.x;
+            
         }
             break;
             
@@ -239,6 +258,34 @@
     [self reloadData];
 }
 
+- (void)setIsCanScroll:(BOOL)isCanScroll
+{
+    if (_isCanScroll == isCanScroll) return;
+    
+    _isCanScroll = isCanScroll;
+    
+    if (isCanScroll)
+        [self addGestureRecognizer:self.panGesture];
+    else
+        [self removeGestureRecognizer:self.panGesture];
+}
+
 #pragma mark - Get
+
+- (UITapGestureRecognizer *)tapGesture
+{
+    if (!_tapGesture) {
+        _tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapClickGesture:)];
+    }
+    return _tapGesture;
+}
+
+- (UIPanGestureRecognizer *)panGesture
+{
+    if (!_panGesture) {
+        _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(panGesture:)];
+    }
+    return _panGesture;
+}
 
 @end
